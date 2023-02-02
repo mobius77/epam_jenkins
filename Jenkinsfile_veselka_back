@@ -1,0 +1,117 @@
+pipeline {
+  
+  agent { node { label 'docker'}}
+
+	environment {
+		DOCKERHUB_CREDENTIALS=credentials('dockerhubaccount')
+	}
+
+  stages {
+    stage('Clone Sources & Information') {
+      steps {
+        withCredentials([string(credentialsId: 'github-key', variable: 'GITHUB_TOKEN')]) {
+          git "https://${GITHUB_TOKEN}@github.com/mobius77/veselka_back.git"
+        }
+      }
+    }
+    stage('Build image') {
+        steps {
+				sh 'docker build -t mobius7/v_back_image:latest .'
+			}
+    }
+    stage('Login') {
+			steps {
+				sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+			}
+		}
+    stage('Push image') {
+      steps {
+				sh 'docker push mobius7/v_back_image:latest'
+      }
+    }
+    stage('Delivery Test & Staging') {
+      steps {
+        withCredentials([sshUserPrivateKey(credentialsId: 'ec2-epam-centos-key', keyFileVariable: 'keyfile')]) 
+          {
+            sh 'rm -f ~/.ssh/id_ecdsa'
+            sh "mkdir -p ~/.ssh && cp ${keyfile} ~/.ssh/id_ecdsa"
+            sh "ssh -v centos@${host_ip}"
+
+            sh 'tar -czf config.tar.gz ./config'
+            sh "ssh centos@${host_ip} \"mkdir -p docker/build\""
+            sh "scp ./docker-compose.yml centos@${host_ip}:docker/build"
+            sh "scp ./config.tar.gz centos@${host_ip}:docker/build"
+            sh "ssh centos@${host_ip} \"tar zxf docker/build/config.tar.gz --directory docker/build\""
+
+            sh "ssh centos@${host_ip} \"echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin\""
+
+            sh "ssh centos@${host_ip} \"docker-compose --project-name veleska_back_test stop\""
+            sh "ssh centos@${host_ip} \"docker-compose --project-name veleska_back_staging stop\""
+
+            sh "ssh centos@${host_ip} \"docker-compose --project-name veleska_back_test rm -f\""
+            sh "ssh centos@${host_ip} \"docker-compose --project-name veleska_back_staging rm -f\""
+
+            sh "ssh centos@${host_ip} \"docker-compose -f ./docker/build/docker-compose.yml pull\""
+
+            sh "ssh centos@${host_ip} \"docker-compose -f ./docker/build/docker-compose.yml --project-name veleska_back_test --env-file ./docker/build/config/.env.dev up -d --force-recreate\""
+            sh "ssh centos@${host_ip} \"docker-compose -f ./docker/build/docker-compose.yml --project-name veleska_back_staging --env-file ./docker/build/config/.env.staging up -d --force-recreate\""
+
+            sh "ssh centos@${host_ip} \"docker logout\""
+
+       //     sh "ssh centos@${host_ip} "rm -rf docker/build/*""
+
+            sh "ssh centos@${host_ip} \"docker logs veleska_back_test-veselkaback-1 >& docker/testLog.txt\""
+            sh "ssh centos@${host_ip} \"docker logs veleska_back_staging-veselkaback-1 >& docker/stagingLog.txt\""
+
+            sh "scp centos@${host_ip}:docker/testLog.txt . "
+            sh "scp centos@${host_ip}:docker/stagingLog.txt . "
+
+            archiveArtifacts artifacts: '*.txt', fingerprint: true
+
+          }
+        
+      }
+    }
+
+    stage('Approval') {
+      agent none
+        steps {
+          script {
+            timeout(time:5, unit:'DAYS') {
+              def deploymentDelay = input id: 'Deploy', message: 'Deploy to production?', submitter: 'admin', parameters: [choice(choices: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24'], description: 'Hours to delay deployment?', name: 'deploymentDelay')]
+              sleep time: deploymentDelay.toInteger(), unit: 'HOURS'
+            }
+          }
+        }
+    }
+
+    stage('Delivery Prod') {
+        agent { node { label 'docker'}}
+        steps {
+          withCredentials([sshUserPrivateKey(credentialsId: 'vue3-hosting', keyFileVariable: 'keyfile')]) 
+          {
+       //     lock(resource: 'deployApplication'){
+
+            sh "ssh centos@${host_ip} \"docker-compose --project-name veleska_back_prod stop\""
+            sh "ssh centos@${host_ip} \"docker-compose --project-name veleska_back_prod rm -f\""
+            sh "ssh centos@${host_ip} \"docker-compose -f ./docker/build/docker-compose.yml --project-name veleska_back_prod --env-file ./docker/build/config/.env up -d --force-recreate\""
+            sh "ssh centos@${host_ip} \"docker logs veleska_back_prod-veselkaback-1 >& docker/prodLog.txt\""
+            sh "scp centos@${host_ip}:docker/prodLog.txt . "
+            
+            archiveArtifacts artifacts: 'prodLog.txt', fingerprint: true
+
+            }
+      //    }
+        }
+    }
+
+  }  
+  post {
+    always {
+      sh 'docker logout'
+    }
+  }
+	
+
+
+}
