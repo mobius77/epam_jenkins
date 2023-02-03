@@ -16,49 +16,42 @@ pipeline {
       }
     }
 
-  stage("Terraform Init") {
-    steps {
-      sh "terraform init -reconfigure"
-    }
-  }
-  stage("Terraform Plan") {
-    steps {
-      sh "terraform plan -out terraform.plan"
-      archiveArtifacts artifacts: "terraform.plan"
-    }
-  }
-  stage("Terraform action") {
-    steps {
-      echo "Action is: ${action}"
-      sh "terraform ${action} -auto-approve"
-
-      
-      script {
-          if(action == "apply") {
-          ipAddress = sh(returnStdout: true, script: 'terraform output instance_ip').trim()
-
-          sh "echo '${ipAddress}' >> ip.txt"
-
-        //  env.instance_ip = ipAddress
-
-          // withEnv(["INSTANCE_IP=${ipAddress}"]) {
-          //           echo "IP address: ${INSTANCE_IP}"
-          // }
-          archiveArtifacts artifacts: "ip.txt"
-        }
-
+    stage("Terraform Init") {
+      steps {
+        sh "terraform init -reconfigure"
       }
-      // script {
-      //     // Access the global environment variable
-      //     def ip = env.INSTANCE_IP
-      //     echo "IP address is: ${ip}"
-      // }
+    }
 
-      echo "IP address is: ${ipAddress}"
+    stage("Terraform Plan") {
+      steps {
+        sh "terraform plan -out terraform.plan"
+        archiveArtifacts artifacts: "terraform.plan"
+      }
+    }
 
+    stage("Terraform action") {
+      steps {
+        echo "Action is: ${action}"
+        sh "terraform ${action} -auto-approve"
+        script {
+            if(action == "apply") {
+            ipAddress = sh(returnStdout: true, script: 'terraform output instance_ip').trim()
+            sh "echo '${ipAddress}' > ip.txt"
+          //  env.instance_ip = ipAddress
+
+            // withEnv(["INSTANCE_IP=${ipAddress}"]) {
+            //           echo "IP address: ${INSTANCE_IP}"
+            // }
+            archiveArtifacts artifacts: "ip.txt"
+          }
+        }
+        // script {
+        //     // Access the global environment variable
+        //     def ip = env.INSTANCE_IP
+        //     echo "IP address is: ${ip}"
+        // }
+        echo "IP address is: ${ipAddress}"
+      }
     }
   }
-
-  }
-
 }

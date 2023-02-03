@@ -8,45 +8,16 @@ def dockerRun = "whoami && \
             source .bashrc"
 
 pipeline {
-  
   agent { node { label 'terraform'}}
-
   // environment {
-
   // }
-
   stages {
-//yum install -y yum-utils device-mapper-persistent-data lvm2
-  stage("Connect to EC2") {
-    
-
-    steps {
-
-
-      sshagent(credentials: ['ec2-epam-centos-key']) {
-        sh "ssh -o StrictHostKeyChecking=no centos@${host_ip} '${dockerRun}'"
+    stage("Connect to EC2") {
+      steps {
+        sshagent(credentials: ['ec2-epam-centos-key']) {
+          sh "ssh -o StrictHostKeyChecking=no centos@${host_ip} '${dockerRun}'"
+        }
       }
-
-      
-
-
-      // script {
-
-      //   withEnv(["INSTANCE_IP=${ipAddress}"]) {
-      //             echo "IP address: ${INSTANCE_IP}"
-      //   }
-
-      // }
-
-      // script {
-        
-      //     def ip = env.INSTANCE_IP
-      //     echo "IP address is: ${ip}"
-      // }
-
-    //  echo "IP address is: ${ipAddress}"
-
     }
-  }
   }
 }

@@ -58,8 +58,6 @@ pipeline {
 
             sh "ssh centos@${host_ip} \"docker logout\""
 
-       //     sh "ssh centos@${host_ip} "rm -rf docker/build/*""
-
             sh "ssh centos@${host_ip} \"docker logs veleska_back_test-veselkaback-1 >& docker/testLog.txt\""
             sh "ssh centos@${host_ip} \"docker logs veleska_back_staging-veselkaback-1 >& docker/stagingLog.txt\""
 
@@ -112,6 +110,4 @@ pipeline {
     }
   }
 	
-
-
 }
