@@ -11,7 +11,7 @@ pipeline {
     stage('Clone Sources & Information') {
       steps {
         withCredentials([string(credentialsId: 'github-key', variable: 'GITHUB_TOKEN')]) {
-          git "https://${GITHUB_TOKEN}@github.com/mobius77/veselka_back.git"
+          git "https://${GITHUB_TOKEN}@github.com/mobius77/epam_veselka_back.git"
         }
       }
     }
