@@ -4,7 +4,7 @@ pipeline {
 
 	environment {
 		DOCKERHUB_CREDENTIALS=credentials('dockerhubaccount')
-    host_ip="52.29.9.109"
+    host_ip="3.70.52.90"
 	}
 
   stages {
