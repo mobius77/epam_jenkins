@@ -88,7 +88,7 @@ pipeline {
     stage('Delivery Prod') {
         agent { node { label 'docker'}}
         steps {
-          withCredentials([sshUserPrivateKey(credentialsId: 'vue3-hosting', keyFileVariable: 'keyfile')]) 
+          withCredentials([sshUserPrivateKey(credentialsId: 'ec2-epam-centos-key', keyFileVariable: 'keyfile')]) 
           {
             sh 'rm -f ~/.ssh/id_ecdsa'
             sh "mkdir -p ~/.ssh && cp ${keyfile} ~/.ssh/id_ecdsa"
