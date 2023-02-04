@@ -12,12 +12,19 @@ pipeline {
   // environment {
   // }
   stages {
-    stage("Connect to EC2") {
+    stage("Connect to test EC2") {
       steps {
         sshagent(credentials: ['ec2-epam-centos-key']) {
-          sh "ssh -o StrictHostKeyChecking=no centos@${host_ip} '${dockerRun}'"
+          sh "ssh -o StrictHostKeyChecking=no centos@test.mobiusz.tk '${dockerRun}'"
         }
       }
     }
+    stage("Connect to prod EC2") {
+      steps {
+        sshagent(credentials: ['ec2-epam-centos-key']) {
+          sh "ssh -o StrictHostKeyChecking=no centos@prod.mobiusz.tk '${dockerRun}'"
+        }
+      }
+    }    
   }
 }
