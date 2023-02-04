@@ -18,7 +18,8 @@ pipeline {
     }
     stage('Build image') {
         steps {
-				sh 'docker build -t mobius7/v_back_image:latest .'
+				sh 'docker build -t mobius7/v_back_image:$BUILD_ID .'
+        sh 'docker tag mobius7/v_back_image:$BUILD_ID mobius7/v_back_image:latest'
 			}
     }
     stage('Login') {
@@ -28,6 +29,7 @@ pipeline {
 		}
     stage('Push image') {
       steps {
+        sh 'docker push mobius7/v_back_image:$BUILD_ID'
 				sh 'docker push mobius7/v_back_image:latest'
       }
     }
