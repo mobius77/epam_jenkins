@@ -4,7 +4,8 @@ pipeline {
 
 	environment {
 		DOCKERHUB_CREDENTIALS=credentials('dockerhubaccount')
-    host_ip="3.70.52.90"
+    host_ip="test.mobiusz.tk"
+    host_prod_ip="prod.mobiusz.tk"
 	}
 
   stages {
@@ -91,11 +92,11 @@ pipeline {
           {
        //     lock(resource: 'deployApplication'){
 
-            sh "ssh centos@${host_ip} \"docker-compose --project-name veleska_back_prod stop\""
-            sh "ssh centos@${host_ip} \"docker-compose --project-name veleska_back_prod rm -f\""
-            sh "ssh centos@${host_ip} \"docker-compose -f ./docker/build/docker-compose.yml --project-name veleska_back_prod --env-file ./docker/build/config/.env up -d --force-recreate\""
-            sh "ssh centos@${host_ip} \"docker logs veleska_back_prod-veselkaback-1 >& docker/prodLog.txt\""
-            sh "scp centos@${host_ip}:docker/prodLog.txt . "
+            sh "ssh centos@${host_prod_ip} \"docker-compose --project-name veleska_back_prod stop\""
+            sh "ssh centos@${host_prod_ip} \"docker-compose --project-name veleska_back_prod rm -f\""
+            sh "ssh centos@${host_prod_ip} \"docker-compose -f ./docker/build/docker-compose.yml --project-name veleska_back_prod --env-file ./docker/build/config/.env up -d --force-recreate\""
+            sh "ssh centos@${host_prod_ip} \"docker logs veleska_back_prod-veselkaback-1 >& docker/prodLog.txt\""
+            sh "scp centos@${host_prod_ip}:docker/prodLog.txt . "
             
             archiveArtifacts artifacts: 'prodLog.txt', fingerprint: true
 
