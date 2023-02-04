@@ -90,7 +90,17 @@ pipeline {
         steps {
           withCredentials([sshUserPrivateKey(credentialsId: 'vue3-hosting', keyFileVariable: 'keyfile')]) 
           {
-       //     lock(resource: 'deployApplication'){
+            sh 'rm -f ~/.ssh/id_ecdsa'
+            sh "mkdir -p ~/.ssh && cp ${keyfile} ~/.ssh/id_ecdsa"
+            sh "ssh -v centos@${host_prod_ip}"
+
+            sh 'tar -czf config.tar.gz ./config'
+            sh "ssh centos@${host_prod_ip} \"mkdir -p docker/build\""
+            sh "scp ./docker-compose.yml centos@${host_prod_ip}:docker/build"
+            sh "scp ./config.tar.gz centos@${host_prod_ip}:docker/build"
+            sh "ssh centos@${host_prod_ip} \"tar zxf docker/build/config.tar.gz --directory docker/build\""
+
+            sh "ssh centos@${host_prod_ip} \"echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin\""
 
             sh "ssh centos@${host_prod_ip} \"docker-compose --project-name veleska_back_prod stop\""
             sh "ssh centos@${host_prod_ip} \"docker-compose --project-name veleska_back_prod rm -f\""
