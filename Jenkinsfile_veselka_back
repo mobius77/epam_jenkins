@@ -71,9 +71,7 @@ pipeline {
             sh "scp centos@${host_ip}:docker/stagingLog.txt . "
 
             archiveArtifacts artifacts: '*.txt', fingerprint: true
-
           }
-        
       }
     }
 
@@ -117,9 +115,7 @@ pipeline {
             sh "scp centos@${host_prod_ip}:docker/prodLog.txt . "
             
             archiveArtifacts artifacts: 'prodLog.txt', fingerprint: true
-
-            }
-
+          }
         }
     }
 
