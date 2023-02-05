@@ -15,6 +15,7 @@ pipeline {
     stage("Connect to test EC2") {
       steps {
         sshagent(credentials: ['ec2-epam-centos-key']) {
+          sh "ssh-keygen -f \"/var/lib/jenkins/.ssh/known_hosts\" -R \"test.mobiusz.tk\""
           sh "ssh -o StrictHostKeyChecking=no centos@test.mobiusz.tk '${dockerRun}'"
         }
       }
@@ -22,6 +23,7 @@ pipeline {
     stage("Connect to prod EC2") {
       steps {
         sshagent(credentials: ['ec2-epam-centos-key']) {
+          sh "ssh-keygen -f \"/var/lib/jenkins/.ssh/known_hosts\" -R \"prod.mobiusz.tk\""
           sh "ssh -o StrictHostKeyChecking=no centos@prod.mobiusz.tk '${dockerRun}'"
         }
       }
