@@ -90,7 +90,6 @@ pipeline {
     }
 
     stage('Delivery Prod') {
-        // agent { node { label 'docker'}}
         steps {
           withCredentials([sshUserPrivateKey(credentialsId: 'ec2-epam-centos-key', keyFileVariable: 'keyfile')]) 
           {
@@ -120,7 +119,7 @@ pipeline {
             archiveArtifacts artifacts: 'prodLog.txt', fingerprint: true
 
             }
-      //    }
+
         }
     }
 

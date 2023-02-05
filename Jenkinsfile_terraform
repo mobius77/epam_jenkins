@@ -37,19 +37,9 @@ pipeline {
             if(action == "apply") {
             ipAddress = sh(returnStdout: true, script: 'terraform output instance_ip').trim()
             sh "echo '${ipAddress}' > ip.txt"
-          //  env.instance_ip = ipAddress
-
-            // withEnv(["INSTANCE_IP=${ipAddress}"]) {
-            //           echo "IP address: ${INSTANCE_IP}"
-            // }
             archiveArtifacts artifacts: "ip.txt"
           }
         }
-        // script {
-        //     // Access the global environment variable
-        //     def ip = env.INSTANCE_IP
-        //     echo "IP address is: ${ip}"
-        // }
         echo "IP address is: ${ipAddress}"
       }
     }

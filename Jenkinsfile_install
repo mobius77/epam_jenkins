@@ -9,8 +9,6 @@ def dockerRun = "whoami && \
 
 pipeline {
   agent { node { label 'terraform'}}
-  // environment {
-  // }
   stages {
     stage("Connect to test EC2") {
       steps {
