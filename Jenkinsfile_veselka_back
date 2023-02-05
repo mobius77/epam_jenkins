@@ -39,7 +39,7 @@ pipeline {
           {
             sh 'rm -f ~/.ssh/id_ecdsa'
             sh "mkdir -p ~/.ssh && cp ${keyfile} ~/.ssh/id_ecdsa"
-            sh "ssh -v centos@${host_ip}"
+            sh "ssh -o StrictHostKeyChecking=no -v centos@${host_ip}"
 
             sh 'tar -czf config.tar.gz ./config'
             sh "ssh centos@${host_ip} \"mkdir -p docker/build\""
@@ -94,7 +94,7 @@ pipeline {
           {
             sh 'rm -f ~/.ssh/id_ecdsa'
             sh "mkdir -p ~/.ssh && cp ${keyfile} ~/.ssh/id_ecdsa"
-            sh "ssh -v centos@${host_prod_ip}"
+            sh "ssh -o StrictHostKeyChecking=no -v centos@${host_prod_ip}"
 
             sh 'tar -czf config.tar.gz ./config'
             sh "ssh centos@${host_prod_ip} \"mkdir -p docker/build\""
