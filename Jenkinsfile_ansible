@@ -25,34 +25,24 @@ pipeline {
           inventory: './hosts.txt',
           credentialsId: 'ec2-epam-centos-key',
           hostKeyChecking: false,
-//          extras: '-e username=' + username,
           colorized: true
         )
       }
     }
 
-    // stage("Terraform Plan") {
-    //   steps {
-    //     sh "terraform plan -out terraform.plan"
-    //     archiveArtifacts artifacts: "terraform.plan"
-    //   }
-    // }
+    stage("Update and Install") {
+      steps {
+        sh "ssh-keygen -f \"/var/lib/jenkins/.ssh/known_hosts\" -R \"${host_ip}\""
+        sh "ssh-keygen -f \"/var/lib/jenkins/.ssh/known_hosts\" -R \"${host_prod_ip}\""
+        ansiblePlaybook( 
+          playbook: 'playbook_install.yml',
+          inventory: './hosts.txt',
+          credentialsId: 'ec2-epam-centos-key',
+          hostKeyChecking: false,
+          colorized: true
+        )
+      }
+    }
 
-    // stage("Terraform action") {
-    //   steps {
-    //     echo "Action is: ${action}"
-    //     sh "terraform ${action} -auto-approve"
-    //     script {
-    //         if(action == "apply") {
-    //         ipAddress = sh(returnStdout: true, script: 'terraform output test_instance_ip').trim()
-    //         ipAddressProd = sh(returnStdout: true, script: 'terraform output prod_instance_ip').trim()
-    //         sh "echo '${ipAddress}' > ip.txt"
-    //         sh "echo '${ipAddressProd}' >> ip.txt"
-    //         archiveArtifacts artifacts: "ip.txt"
-    //       }
-    //     }
-    //     echo "IP address is: ${ipAddress}"
-    //   }
-    //}
   }
 }
