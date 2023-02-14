@@ -32,8 +32,6 @@ pipeline {
 
     stage("Update and Install") {
       steps {
-        sh "ssh-keygen -f \"/var/lib/jenkins/.ssh/known_hosts\" -R \"${host_ip}\""
-        sh "ssh-keygen -f \"/var/lib/jenkins/.ssh/known_hosts\" -R \"${host_prod_ip}\""
         ansiblePlaybook( 
           playbook: 'playbook_install.yml',
           inventory: './hosts.txt',
