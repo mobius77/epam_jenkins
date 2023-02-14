@@ -16,7 +16,7 @@ pipeline {
       }
     }
 
-    stage("Terraform Init") {
+    stage("Ansible Ping") {
       steps {
         ansiblePlaybook( 
           playbook: 'playbook_ping.yml',
