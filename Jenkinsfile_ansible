@@ -33,7 +33,7 @@ pipeline {
     stage("Update and Install") {
       steps {
         ansiblePlaybook( 
-          playbook: 'playbook_install.yml',
+          playbook: 'playbook_docker.yml',
           inventory: './hosts.txt',
           credentialsId: 'ec2-epam-centos-key',
           hostKeyChecking: false,
