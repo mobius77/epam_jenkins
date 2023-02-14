@@ -30,10 +30,22 @@ pipeline {
       }
     }
 
-    stage("Update and Install") {
+    stage("Install Docker") {
       steps {
         ansiblePlaybook( 
           playbook: 'playbook_docker.yml',
+          inventory: './hosts.txt',
+          credentialsId: 'ec2-epam-centos-key',
+          hostKeyChecking: false,
+          colorized: true
+        )
+      }
+    }
+
+    stage("Install Docker-composer") {
+      steps {
+        ansiblePlaybook( 
+          playbook: 'playbook_docker-composer.yml',
           inventory: './hosts.txt',
           credentialsId: 'ec2-epam-centos-key',
           hostKeyChecking: false,
