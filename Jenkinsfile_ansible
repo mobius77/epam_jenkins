@@ -5,8 +5,8 @@ pipeline {
   agent { node { label 'ansible'}}
 
   environment {
-    AWS_ACCESS_KEY_ID = credentials("aws-access-key")
-    AWS_SECRET_ACCESS_KEY = credentials("aws-secret-key")
+    host_ip="test.mobiusz.tk"
+    host_prod_ip="prod.mobiusz.tk"
   }
 
   stages {
@@ -18,6 +18,8 @@ pipeline {
 
     stage("Ansible Ping") {
       steps {
+        sh "ssh-keygen -f \"/var/lib/jenkins/.ssh/known_hosts\" -R \"${host_ip}\""
+        sh "ssh-keygen -f \"/var/lib/jenkins/.ssh/known_hosts\" -R \"${host_prod_ip}\""
         ansiblePlaybook( 
           playbook: 'playbook_ping.yml',
           inventory: './hosts.txt',
