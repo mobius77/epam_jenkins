@@ -23,7 +23,7 @@ pipeline {
         ansiblePlaybook( 
           playbook: 'playbook_ping.yml',
           inventory: './hosts.txt',
-          credentialsId: 'aws-access-key',
+          credentialsId: 'ec2-epam-centos-key',
           hostKeyChecking: false,
 //          extras: '-e username=' + username,
           colorized: true
