@@ -1,0 +1,56 @@
+def ipAddress
+
+pipeline {
+  
+  agent { node { label 'ansible'}}
+
+  environment {
+    AWS_ACCESS_KEY_ID = credentials("aws-access-key")
+    AWS_SECRET_ACCESS_KEY = credentials("aws-secret-key")
+  }
+
+  stages {
+    stage('Clone Ansible repo') {
+      steps {
+        git 'https://github.com/mobius77/epam_ansible.git'
+      }
+    }
+
+    stage("Terraform Init") {
+      steps {
+        ansiblePlaybook( 
+          playbook: 'playbook_ping.yml',
+          inventory: './hosts.txt',
+          credentialsId: 'aws-access-key',
+          hostKeyChecking: false,
+//          extras: '-e username=' + username,
+          colorized: true
+        )
+      }
+    }
+
+    // stage("Terraform Plan") {
+    //   steps {
+    //     sh "terraform plan -out terraform.plan"
+    //     archiveArtifacts artifacts: "terraform.plan"
+    //   }
+    // }
+
+    // stage("Terraform action") {
+    //   steps {
+    //     echo "Action is: ${action}"
+    //     sh "terraform ${action} -auto-approve"
+    //     script {
+    //         if(action == "apply") {
+    //         ipAddress = sh(returnStdout: true, script: 'terraform output test_instance_ip').trim()
+    //         ipAddressProd = sh(returnStdout: true, script: 'terraform output prod_instance_ip').trim()
+    //         sh "echo '${ipAddress}' > ip.txt"
+    //         sh "echo '${ipAddressProd}' >> ip.txt"
+    //         archiveArtifacts artifacts: "ip.txt"
+    //       }
+    //     }
+    //     echo "IP address is: ${ipAddress}"
+    //   }
+    }
+  }
+}
